@@ -1,0 +1,34 @@
+* Verificar la configuración para SASL
+* Incorporar DATA de ejemplo de diversos tipos
+* Configurar reglas y extensiones para Asterisk
+* Configuración de replicación (consumer) contra otro servidor LDAP
+* Configuración entre dos servidores (mirrorMode) de replica
+* Configuración DHCP
+* Configuración DNS
+* CUPS e impresoras
+* easy-ldap-gui: interfaz administrativa web
+* consola administrativa
+
+easyldap
+- modulos
+
+easyldap module install syncprov
+
+module install -n nombre
+module uninstall -n nombre
+
+module install -n syncprov
+
+- aplicaciones
+application install -n nombre
+application uninstall -n nombre
+
+ejemplo:
+
+application install -n samba -d dominio
+
+- tree (domain)
+tree create -d nombre
+tree delete -d nombre
+
+tree create -d dominio

@@ -1,0 +1,44 @@
+#!/bin/bash
+# ================================================================================
+# ELDAP: Easy LDAP: Install and configure openLDAP on Debian GNU/Linux
+#
+# Copyright © 2012 Jesús Lara Giménez (phenobarbital) <jesuslarag@gmail.com>
+# Version: 2.0  
+#
+#    Developed by Jesus Lara (phenobarbital) <jesuslara@phenobarbital.info>
+#    https://github.com/phenobarbital/easyldap
+#    
+#    License: GNU GPL version 3  <http://gnu.org/licenses/gpl.html>.
+#    This is free software: you are free to change and redistribute it.
+#    There is NO WARRANTY, to the extent permitted by law.
+#
+# ================================================================================
+
+# get configuration
+if [ -e /etc/easyldap.conf ]; then
+    . /etc/easyldap.conf
+else
+    . ./etc/easyldap.conf
+fi
+
+
+# common functions
+if [ -e /usr/lib/easyldap/easyldap.sh ]; then
+    . /usr/lib/easyldap/easyldap.sh
+else
+    . ./lib/easyldap.sh
+fi
+
+if [ "$(id -u)" != "0" ]; then
+   error "==== MUST BE RUN AS ROOT ====" >&2
+   exit 1
+fi
+
+### Main program ##
+
+# si no pasamos ningun parametro
+if [ $# = 0 ]; then
+    usage
+    exit 0
+fi
+
