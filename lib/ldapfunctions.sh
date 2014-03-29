@@ -38,6 +38,11 @@ ldap_configure()
 	cn_config
 	ldap_modules
 	
+	# create directory tree
+	
+	# backend optimize
+	$BACKEND_tunning
+	
 	# ejecutar los hooks del directorio ldap.d
 	return 0	
 }
@@ -115,3 +120,154 @@ olcModuleload: valsort
 olcModuleload: memberof
 EOF
 }
+
+test_config()
+{
+	$SLAPTEST -F $LDAP_DIRECTORY
+	if [ "$?" -ne "0" ]; then
+		debug "OpenLDAP incorrect configuration, please check for errors"
+		return 1
+	else
+		return 0
+	fi
+}
+
+hdb_tunning()
+{
+	IDX=$@
+# tunning de la DB
+$LDAPADD << EOF
+dn: olcDatabase={$IDX}hdb,cn=config
+changetype: modify
+replace: olcRootPW
+olcRootPW: `$SLAPPASSWD -uvs $PASS`
+-
+replace: olcLastMod
+olcLastMod: TRUE
+-
+replace: olcAddContentAcl
+olcAddContentAcl: TRUE
+-
+replace: olcReadOnly
+olcReadOnly: FALSE
+-
+replace: olcSizeLimit
+olcSizeLimit: 2000
+-
+replace: olcTimeLimit
+olcTimeLimit: 60
+-
+replace: olcDbIDLcacheSize
+olcDbIDLcacheSize: 500000
+-
+replace: olcDbCacheFree
+olcDbCacheFree: 1000
+-
+replace: olcDbDNcacheSize
+olcDbDNcacheSize: 0
+-
+replace: olcDbCacheSize
+olcDbCacheSize: 5000
+-
+replace: olcDbCheckpoint
+olcDbCheckpoint: 1024 30
+-
+replace: olcMaxDerefDepth
+olcMaxDerefDepth: 15
+-
+replace: olcSyncUseSubentry
+olcSyncUseSubentry: FALSE
+-
+replace: olcMonitoring
+olcMonitoring: TRUE
+-
+replace: olcDbConfig
+olcDbConfig: {0}set_cachesize 0 10485760 0
+olcDbConfig: {1}set_lk_max_objects 1500
+olcDbConfig: {2}set_lk_max_locks 1500
+olcDbConfig: {3}set_lk_max_lockers 1500
+olcDbConfig: {4}set_lg_bsize 2097152
+olcDbConfig: {5}set_flags DB_LOG_AUTOREMOVE
+EOF
+}
+
+mdb_tunning()
+{
+	IDX=$@
+# tunning de la DB
+$LDAPADD << EOF
+dn: olcDatabase={$IDX}hdb,cn=config
+changetype: modify
+replace: olcRootPW
+olcRootPW: `$SLAPPASSWD -uvs $PASS`
+-
+replace: olcLastMod
+olcLastMod: TRUE
+-
+replace: olcAddContentAcl
+olcAddContentAcl: TRUE
+-
+replace: olcReadOnly
+olcReadOnly: FALSE
+-
+replace: olcSizeLimit
+olcSizeLimit: 2000
+-
+replace: olcTimeLimit
+olcTimeLimit: 60
+-
+replace: olcDbIDLcacheSize
+olcDbIDLcacheSize: 500000
+-
+replace: olcDbCacheFree
+olcDbCacheFree: 1000
+-
+replace: olcDbDNcacheSize
+olcDbDNcacheSize: 0
+-
+replace: olcDbCacheSize
+olcDbCacheSize: 5000
+-
+replace: olcDbCheckpoint
+olcDbCheckpoint: 1024 30
+-
+replace: olcMaxDerefDepth
+olcMaxDerefDepth: 15
+-
+replace: olcSyncUseSubentry
+olcSyncUseSubentry: FALSE
+-
+replace: olcMonitoring
+olcMonitoring: TRUE
+-
+replace: olcDbConfig
+olcDbConfig: {0}set_cachesize 0 10485760 0
+olcDbConfig: {1}set_lk_max_objects 1500
+olcDbConfig: {2}set_lk_max_locks 1500
+olcDbConfig: {3}set_lk_max_lockers 1500
+olcDbConfig: {4}set_lg_bsize 2097152
+olcDbConfig: {5}set_flags DB_LOG_AUTOREMOVE
+EOF
+
+# MDB options
+$LDAPADD << EOF
+dn: olcDatabase={$IDX}hdb,cn=config
+changetype: modify
+replace: olcDbMaxReaders
+olcDbMaxReaders: 0
+-
+replace: olcDbMode
+olcDbMode: 0600
+-
+replace: olcDbSearchStack
+olcDbSearchStack: 16
+-
+replace: olcDbNoSync
+olcDbNoSync: FALSE
+-
+replace: olcDbEnvFlags
+olcDbEnvFlags: {0}writemap
+olcDbEnvFlags: {1}nometasync
+EOF
+}
+

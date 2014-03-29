@@ -269,7 +269,7 @@ function get_admin_password() {
 	echo "= Admin Account = "
 	echo
 	echo "Admin Account for this installation is: "
-	echo "cn=admin,$LDAP_SUFFIX"
+	echo "cn=admin,$BASE_DN"
 	echo 
 	echo "Admin for cn=config is:"
 	echo "cn=admin,cn=config"

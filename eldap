@@ -258,6 +258,8 @@ ldap_configure
 	fi
 
 # finish him!
+test_config
+
 echo
 echo "First restart ..."
 $SERVICE $LDAP_SERVER restart
