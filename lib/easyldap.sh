@@ -14,7 +14,8 @@ INSTALLER="$(which aptitude) -y"
 SERVICE="$(which service)"
 
 # packages
-PACKAGES=( ldap-utils lsof openssl libslp1 ssl-cert ca-certificates )
+BASE_PKGS=( openssl libslp1 ssl-cert ca-certificates )
+PACKAGES=( ldap-utils lsof )
 SASL_PKGS=( sasl2-bin libsasl2-modules-ldap libsasl2-2 )
 		
 ## basic functions 

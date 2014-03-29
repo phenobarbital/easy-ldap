@@ -101,6 +101,16 @@ _MSG
 echo "$testsummary"
 
 info "Testing for Package installation, wait a few minutes ... "
+
+for package in "${BASE_PKGS[@]}"
+do
+test_package "$package"
+	if [ $? -ne 0 ]; then
+		error "Can't install package $package, please check your apt repository"
+		exit 1
+	fi
+done
+
 for package in "${PACKAGES[@]}"
 do
 test_package "$package"
@@ -202,6 +212,16 @@ SIZELIMIT       200
 TIMELIMIT       30
 EOF
 
+# setup base packages
+for package in "${BASE_PKGS[@]}"
+do
+install_package "$package"
+	if [ $? -ne 0 ]; then
+		error "Can't install package $package, please check your apt repository"
+		exit 1
+	fi
+done
+
 # setup utilities
 for package in "${PACKAGES[@]}"
 do
@@ -229,11 +249,11 @@ sleep 1
 # finish him!
 echo
 echo "First restart ..."
-$LDAP_SERVICE restart
+$SERVICE $LDAP_SERVER restart
 sleep 1
 echo
 echo "Remember: Admin Bind DN is:"
-echo "cn=admin,$LDAP_SUFFIX"
+echo "cn=admin,$BASE_DN"
 
 info " [ Easy-LDAP Installed ]"
 
