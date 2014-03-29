@@ -35,13 +35,18 @@ ldap_configure()
 	echo `$SLAPPASSWD -uvs $PASS`
 	echo
 
+	info "Configure cn=config"
 	cn_config
+	
+	info "Enable basic modules"
 	ldap_modules
 	
 	# create directory tree
+	info "Creating Directory Tree"
 	
 	# backend optimize
-	$BACKEND_tunning
+	info "Optimizing backend"
+	$($BACKEND_tunning)
 	
 	# ejecutar los hooks del directorio ldap.d
 	return 0	
@@ -101,18 +106,14 @@ $LDAPADD << EOF
 dn: cn=module{0},cn=config
 changetype: modify
 add: olcModuleLoad
-olcModuleload: back_bdb
 olcModuleload: back_mdb
 olcModuleload: unique
-olcModuleload: back_dnssrv
 olcModuleload: back_ldap
 olcModuleload: syncprov
 olcModuleload: dynlist
 olcModuleload: refint
 olcModuleload: constraint
 olcModuleload: back_monitor
-olcModuleload: back_perl
-olcModuleload: back_shell
 olcModuleload: ppolicy
 olcModuleload: accesslog
 olcModuleload: auditlog
