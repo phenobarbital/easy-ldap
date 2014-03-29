@@ -124,6 +124,14 @@ info "You can install Easy-LDAP in this configuration, Cheers!"
 
 # erase all configuration, database and slapd packages
 uninstall_ldap() {
+
+warning "This option can't be undone"
+read -p "Continue with uninstall (y/n)?" WORK
+
+	if [ "$WORK" != "y" ]; then
+		exit 0
+	fi
+	
 	for package in "${PACKAGES[@]}"
 	do
 		is_installed "$package"
@@ -136,6 +144,8 @@ uninstall_ldap() {
 	# remove directories
 	rm -fR $LDAP_DIRECTORY
 	rm -fR $DB_DIRECTORY
+	
+info "Done, slapd was uninstalled"
 }
 	
 

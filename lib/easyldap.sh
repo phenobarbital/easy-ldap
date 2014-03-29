@@ -14,7 +14,7 @@ INSTALLER="$(which aptitude) -y"
 SERVICE="$(which service)"
 
 # packages
-PACKAGES=( slapd ldap-utils lsof openssl libslp1 ssl-cert )
+PACKAGES=( slapd ldap-utils lsof openssl libslp1 ssl-cert ca-certificates )
 SASL_PKGS=( sasl2-bin libsasl2-modules-ldap libsasl2-2 )
 		
 ## basic functions 
@@ -232,7 +232,7 @@ test_package()
 		echo "dpkg lock in use"
 		exit 1
 	fi
-	debug "Testing if package $@ is available for installation"
+	debug "Testing if package $@ is available"
 	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --simulate install "$@" >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		return 1
