@@ -42,12 +42,15 @@ ldap_configure()
 	ldap_modules
 	
 	# create directory tree
-	info "Creating Directory Tree"
+	info "Creating Directory Tree $BASE_DN"
 	
 	# backend optimize
-	tunning="$BACKEND_tunning"
-	info "Optimizing $tunning backend"
-	$(tunning)
+	info "Optimizing $BACKEND backend"
+	case "$BACKEND" in
+		"mdb") mdb_tunning 1;;
+		"hdb") hdb_tunning 1;;
+		*)  break;;
+	esac
 	
 	# ejecutar los hooks del directorio ldap.d
 	return 0	
