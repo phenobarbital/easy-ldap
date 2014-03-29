@@ -9,6 +9,14 @@
 VERSION='2.0'
 scriptname='Easy LDAP'
 
+# debian options
+INSTALLER="$(which aptitude) -y"
+SERVICE="$(which service)"
+
+# packages
+PACKAGES=( slapd ldap-utils lsof openssl libslp1 ssl-cert )
+SASL_PKGS=( sasl2-bin libsasl2-modules-ldap libsasl2-2 )
+		
 ## basic functions 
 
 export NORMAL='\033[0m'
@@ -196,7 +204,54 @@ install_package()
 	#
 	# Install the packages
 	#
+	lsof /var/lib/dpkg/lock >/dev/null 2>&1
+	if [ $? = 0 ]; then
+		echo "dpkg lock in use"
+		exit 1
+	fi
 	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --option Dpkg::Options::="--force-overwrite" --option Dpkg::Options::="--force-confold" --yes --force-yes install "$@"
+}
+
+# remove a package
+remove_package()
+{
+	message "uninstall Debian package $@"
+	lsof /var/lib/dpkg/lock >/dev/null 2>&1
+	if [ $? = 0 ]; then
+		echo "dpkg lock in use"
+		exit 1
+	fi
+	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --purge remove "$@"
+}
+
+# test if a package exists in repository
+test_package()
+{
+	lsof /var/lib/dpkg/lock >/dev/null 2>&1
+	if [ $? = 0 ]; then
+		echo "dpkg lock in use"
+		exit 1
+	fi
+	debug "Testing if package $@ is available for installation"
+	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --simulate install "$@" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+# test if a package is already installed
+is_installed()
+{
+	# test installation package
+	debug "Test if $@ is installed"
+	dpkg-query -s "$@" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
 # set cn=admin password

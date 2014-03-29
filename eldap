@@ -26,6 +26,9 @@ fi
 # get configuration
 configdir
 
+DEBUG='false'
+VERBOSE='false'
+
 if [ "$(id -u)" != "0" ]; then
    error "==== MUST BE RUN AS ROOT ====" >&2
    exit 1
@@ -96,24 +99,51 @@ testsummary=$(cat << _MSG
 _MSG
 )
 echo "$testsummary"
+
+info "Testing for Package installation, wait a few minutes ... "
+for package in "${PACKAGES[@]}"
+do
+test_package "$package"
+	if [ $? -ne 0 ]; then
+		error "Can't install package $package, please check your apt repository"
+		exit 1
+	fi
+done
+
+for package in "${SASL_PKGS[@]}"
+do
+test_package "$package"
+	if [ $? -ne 0 ]; then
+		error "Can't install package $package, please check your apt repository"
+		exit 1
+	fi
+done
+
+info "You can install Easy-LDAP in this configuration, Cheers!"
 }
 
+# erase all configuration, database and slapd packages
+uninstall_ldap() {
+	for package in "${PACKAGES[@]}"
+	do
+		is_installed "$package"
+		if [ $? -eq 0 ]; then
+			# esta instalado
+			remove_package "$package"
+		fi
+	done
+	$INSTALLER purge $LDAP_SERVER
+	# remove directories
+	rm -fR $LDAP_DIRECTORY
+	rm -fR $DB_DIRECTORY
+}
+	
+
 COMMAND=$1
-case "$COMMAND" in
-    -h|-help|--help) help;;
-    install)   install_ldap;;
-    uninstall)  uninstall_ldap;;
-    test)    test_ldap;;
-    backup)  backup_ldap;;
-    *)        usage;;
-esac
-
 shift
-
 # processing arguments
-ARGS=`getopt -n$0 -u -a -o r:n:d:l:hv --longoptions packages:,debug,usage,verbose,version,help,role::,domain:: -- "$@"`
+ARGS=`getopt -n$0 -u -a -o r:n:d:l:hv --longoptions debug,usage,verbose,version,help,role::,domain:: -- "$@"`
 eval set -- "$ARGS"
-
 while [ $# -gt 0 ]; do
 	case "$1" in
         -d|--domain)
@@ -128,7 +158,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;        
         --debug)
-            VERBOSE='true'
+            DEBUG='true'
             ;;
         --verbose)
             VERBOSE='true'
@@ -143,7 +173,6 @@ while [ $# -gt 0 ]; do
         --)
             break;;
         -?)
-            usage_err "unknown option '$1'"
             exit 1
             ;;
         *)
@@ -153,6 +182,15 @@ while [ $# -gt 0 ]; do
 	esac
     shift
 done
+
+case "$COMMAND" in
+    -h|-help|--help) help;;
+    install)   install_ldap;;
+    uninstall)  uninstall_ldap;;
+    test)    test_ldap;;
+    backup)  backup_ldap;;
+    *)        usage;;
+esac
 
 # = end = #
 
