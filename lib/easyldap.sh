@@ -14,7 +14,7 @@ INSTALLER="$(which aptitude) -y"
 SERVICE="$(which service)"
 
 # packages
-PACKAGES=( slapd ldap-utils lsof openssl libslp1 ssl-cert ca-certificates )
+PACKAGES=( ldap-utils lsof openssl libslp1 ssl-cert ca-certificates )
 SASL_PKGS=( sasl2-bin libsasl2-modules-ldap libsasl2-2 )
 		
 ## basic functions 
@@ -307,7 +307,7 @@ function get_basedn() {
 			result="$result,dc=$component"
 		done
 		IFS="${old_ifs}"
-		LDAP_SUFFIX="${result#,}"
+		BASE_DN="${result#,}"
 	fi
 	return 0
 }

@@ -92,7 +92,7 @@ testsummary=$(cat << _MSG
  *
  * Domain : ....................... $DOMAIN
  * LDAP Server Hostname : ......... $SERVERNAME
- * Base DN : ...................... $LDAP_SUFFIX
+ * Base DN : ...................... $BASE_DN
  *
  *****************************************************************************
 
@@ -125,7 +125,7 @@ info "You can install Easy-LDAP in this configuration, Cheers!"
 # erase all configuration, database and slapd packages
 uninstall_ldap() {
 
-warning "This option can't be undone"
+warning "Uninstall ERASE all configuracion and database from openldap; this option can't be undone"
 read -p "Continue with uninstall (y/n)?" WORK
 
 	if [ "$WORK" != "y" ]; then
@@ -147,7 +147,97 @@ read -p "Continue with uninstall (y/n)?" WORK
 	
 info "Done, slapd was uninstalled"
 }
+
+# install ldap with all options in a basic DIT
+install_ldap()
+{
+	# discover hostname
+	get_hostname
+	# discover domain
+	get_domain
+	# get base_dn
+	get_basedn
 	
+	SERVERNAME=$NAME.$DOMAIN
+
+testsummary=$(cat << _MSG
+
+ ************************** [ Installing Easy-LDAP ] *************************
+ *
+ * Domain : ....................... $DOMAIN
+ * LDAP Server Hostname : ......... $SERVERNAME
+ * Base DN : ...................... $BASE_DN
+ *
+ *****************************************************************************
+
+_MSG
+)
+echo "$testsummary"
+
+info "Easy-LDAP need to install some packages"
+read -p "Continue with installation (y/n)?" WORK
+
+	if [ "$WORK" != "y" ]; then
+		exit 0
+	fi
+
+# pre-configuration
+cat <<EOF > /etc/host.conf
+multi on
+order hosts,bind
+
+EOF
+
+# incorporo las reglas del LDAP en host.allow
+echo "slapd: $SERVERNAME" >> /etc/hosts.allow
+
+# configure ldap.conf
+cat <<EOF > /etc/ldap/ldap.conf
+#
+# LDAP Defaults
+#
+BASE    $BASE_DN
+URI     ldap://$SERVERNAME:389 ldaps://$SERVERNAME:636
+SIZELIMIT       200
+TIMELIMIT       30
+EOF
+
+# setup utilities
+for package in "${PACKAGES[@]}"
+do
+install_package "$package"
+	if [ $? -ne 0 ]; then
+		error "Can't install package $package, please check your apt repository"
+		exit 1
+	fi
+done	
+	
+for package in "${SASL_PKGS[@]}"
+do
+install_package "$package"
+	if [ $? -ne 0 ]; then
+		error "Can't install package $package, please check your apt repository"
+		exit 1
+	fi
+done
+
+# install ldap-server
+install_package $LDAP_SERVER
+
+sleep 1
+
+# finish him!
+echo
+echo "First restart ..."
+$LDAP_SERVICE restart
+sleep 1
+echo
+echo "Remember: Admin Bind DN is:"
+echo "cn=admin,$LDAP_SUFFIX"
+
+info " [ Easy-LDAP Installed ]"
+
+}
 
 COMMAND=$1
 shift
