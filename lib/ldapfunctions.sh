@@ -45,8 +45,8 @@ ldap_configure()
 	info "Creating Directory Tree"
 	
 	# backend optimize
-	info "Optimizing backend"
 	tunning="$BACKEND_tunning"
+	info "Optimizing $tunning backend"
 	$(tunning)
 	
 	# ejecutar los hooks del directorio ldap.d
