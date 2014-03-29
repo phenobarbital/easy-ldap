@@ -240,3 +240,19 @@ function get_admin_password() {
     fi
     return 1
 }
+
+#### LDAP functions ####
+
+# returns base suffix
+function get_basedn() {
+	if [ -z "$BASE_DN" ]; then
+		old_ifs=${IFS}
+		IFS="."
+		for component in $DOMAIN; do
+			result="$result,dc=$component"
+		done
+		IFS="${old_ifs}"
+		LDAP_SUFFIX="${result#,}"
+	fi
+	return 0
+}

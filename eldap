@@ -70,13 +70,53 @@ if [ $# = 0 ]; then
     exit 0
 fi
 
+### main execution program ###
+
+test_ldap()
+{
+	# discover hostname
+	get_hostname
+	# discover domain
+	get_domain
+	# get base_dn
+	get_basedn
+	
+	SERVERNAME=$NAME.$DOMAIN
+
+testsummary=$(cat << _MSG
+
+ ************************** [ Installing Easy-LDAP ] *************************
+ *
+ * Domain : ....................... $DOMAIN
+ * LDAP Server Hostname : ......... $SERVERNAME
+ * Base DN : ...................... $LDAP_SUFFIX
+ *
+ *****************************************************************************
+
+_MSG
+)
+echo "$testsummary"
+}
+
+COMMAND=$1
+case "$COMMAND" in
+    -h|-help|--help) help;;
+    install)   install_ldap;;
+    uninstall)  uninstall_ldap;;
+    test)    test_ldap;;
+    backup)  backup_ldap;;
+    *)        usage;;
+esac
+
+shift
+
 # processing arguments
-ARGS=`getopt -n$0 -u -a -o r:n:D:l:hv --longoptions packages:,debug,usage,verbose,version,help,lan::,role::,domain::,hostname:: -- "$@"`
+ARGS=`getopt -n$0 -u -a -o r:n:d:l:hv --longoptions packages:,debug,usage,verbose,version,help,role::,domain:: -- "$@"`
 eval set -- "$ARGS"
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-        -D|--domain)
+        -d|--domain)
 			optarg_check $1 "$2"
             check_domain $2
             DOMAIN=$2
@@ -114,4 +154,6 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-### main execution program ###
+# = end = #
+
+exit 0
