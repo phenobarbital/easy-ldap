@@ -28,7 +28,17 @@ logMessage () {
 
 get_version() 
 {
-	echo "Easy-LDAP $VERSION";
+	MESSAGE=$(cat << _MSG
+Easy-LDAP $VERSION
+Copyright (C) 2012 Jesus Lara (phenobarbital) <jesuslarag@gmail.com>"
+Licencia GPLv3+: GPL de GNU versión 3 o posterior <http://gnu.org/licenses/gpl.html>"
+
+Esto es software libre; usted es libre de cambiarlo y redistribuirlo.
+NO hay GARANTÍA, a la extensión permitida por la ley.
+_MSG
+)
+
+echo "$MESSAGE"
 }
 
 ## message functions
@@ -105,6 +115,15 @@ optarg_check()
 
 ## info functions
 
+configdir()
+{
+	if [ -e "/etc/easyldap.conf" ]; then
+		. /etc/easyldap.conf
+	else
+		. ./etc/easyldap.conf
+	fi
+}
+
 datadir()
 {
 		if [ -d "/usr/share/easyldap/data" ]; then
@@ -157,6 +176,17 @@ get_domain()
 	fi
 }
 
+check_domain()
+{
+	if [[ "${#1}" -gt 254 ]] || [[ "${#1}" -lt 2 ]]; then
+		usage_err "domain name '$1' is an invalid domain name"
+	fi
+	dom=$(echo $1 | grep -P '(?=^.{5,254}$)(^(?:(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)')
+	if [ -z $dom ]; then
+		usage_err "domain name '$1' is an invalid domain name"
+	fi
+}
+
 ## Installation options
 
 # install package with no prompt and default options
@@ -169,3 +199,44 @@ install_package()
 	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --option Dpkg::Options::="--force-overwrite" --option Dpkg::Options::="--force-confold" --yes --force-yes install "$@"
 }
 
+# set cn=admin password
+function get_admin_password() {
+	echo
+	echo "= Admin Account = "
+	echo
+	echo "Admin Account for this installation is: "
+	echo "cn=admin,$LDAP_SUFFIX"
+	echo 
+	echo "Admin for cn=config is:"
+	echo "cn=admin,cn=config"
+	echo
+	echo "Please, set password for this account:"
+	while /bin/true; do
+        echo -n "New password: "
+        stty -echo
+        read pass1
+        stty echo
+        echo
+        if [ -z "$pass1" ]; then
+            echo "Error, password cannot be empty"
+            echo
+            continue
+        fi
+        echo -n "Repeat new password: "
+        stty -echo
+        read pass2
+        stty echo
+        echo
+        if [ "$pass1" != "$pass2" ]; then
+            echo "Error, passwords don't match"
+            echo
+            continue
+        fi
+        PASS="$pass1"
+        break
+	done
+    if [ -n "$PASS" ]; then
+        return 0
+    fi
+    return 1
+}

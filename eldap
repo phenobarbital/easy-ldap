@@ -14,13 +14,7 @@
 #
 # ================================================================================
 
-# get configuration
-if [ -e /etc/easyldap.conf ]; then
-    . /etc/easyldap.conf
-else
-    . ./etc/easyldap.conf
-fi
-
+### Configure program ##
 
 # common functions
 if [ -e /usr/lib/easyldap/easyldap.sh ]; then
@@ -29,12 +23,46 @@ else
     . ./lib/easyldap.sh
 fi
 
+# get configuration
+configdir
+
 if [ "$(id -u)" != "0" ]; then
    error "==== MUST BE RUN AS ROOT ====" >&2
    exit 1
 fi
 
-### Main program ##
+usage() {
+	echo "Usage: $(basename $0) {install|uninstall|backup|test} [-d|--domain=DOMAIN] [--debug] [-h|--help]"
+}
+
+help() {
+	usage
+cat <<EOF
+
+This script is a helper to install and configure openLDAP on
+Debian systems.
+The script will install openldap, configure DIT for ldap tree,
+overlays, modules, logging and basic ACL.
+
+Commands:
+  install                    Install OpenLDAP Server
+  uninstall                  Uninstall openLDAP Server
+  backup                     Create a backup of OpenLDAP Server
+  test                       Test configuration
+
+Options:
+  -d, --domain               Define a Domain Name
+  --debug                    Enable debugging information
+  -r, --role                 role-based script for running in server after installation
+  Help options:
+      --help     give this help list
+      --usage	 Display brief usage message
+      --version  print program version
+EOF
+#	echo ''
+#	get_version
+	exit 1
+}
 
 # si no pasamos ningun parametro
 if [ $# = 0 ]; then
@@ -42,3 +70,48 @@ if [ $# = 0 ]; then
     exit 0
 fi
 
+# processing arguments
+ARGS=`getopt -n$0 -u -a -o r:n:D:l:hv --longoptions packages:,debug,usage,verbose,version,help,lan::,role::,domain::,hostname:: -- "$@"`
+eval set -- "$ARGS"
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+        -D|--domain)
+			optarg_check $1 "$2"
+            check_domain $2
+            DOMAIN=$2
+            shift
+            ;;
+        -r|--role)
+			optarg_check $1 "$2"
+            ROLENAME=$2
+            shift
+            ;;        
+        --debug)
+            VERBOSE='true'
+            ;;
+        --verbose)
+            VERBOSE='true'
+            ;;     
+        -v|--version)
+			get_version
+			exit 0;;
+        -h|--help)
+            help
+            exit 1
+            ;;
+        --)
+            break;;
+        -?)
+            usage_err "unknown option '$1'"
+            exit 1
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+	esac
+    shift
+done
+
+### main execution program ###
