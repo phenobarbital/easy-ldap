@@ -124,6 +124,14 @@ optarg_check()
 
 ## info functions
 
+ldapfunctions() {
+	if [ -e /usr/lib/easyldap/ldapfunctions.sh ]; then
+		. /usr/lib/easyldap/ldapfunctions.sh
+	else
+		. ./lib/ldapfunctions.sh
+	fi
+}
+
 configdir()
 {
 	if [ -e "/etc/easyldap.conf" ]; then
@@ -222,7 +230,7 @@ remove_package()
 		echo "dpkg lock in use"
 		exit 1
 	fi
-	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --purge remove "$@"
+	DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get --yes --purge remove "$@"
 }
 
 # test if a package exists in repository

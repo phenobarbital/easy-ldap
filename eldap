@@ -155,7 +155,7 @@ read -p "Continue with uninstall (y/n)?" WORK
 	rm -fR $LDAP_DIRECTORY
 	rm -fR $DB_DIRECTORY
 	
-info "Done, slapd was uninstalled"
+info "Done, Easy-LDAP was uninstalled"
 }
 
 # install ldap with all options in a basic DIT
@@ -245,6 +245,17 @@ done
 install_package $LDAP_SERVER
 
 sleep 1
+
+debug "Configure OpenLDAP"
+ldapfunctions
+
+### configure openLDAP
+
+ldap_configure
+	if [ $? -ne 0 ]; then
+		error "Can't configure openLDAP, error in configuration"
+		exit 1
+	fi
 
 # finish him!
 echo
