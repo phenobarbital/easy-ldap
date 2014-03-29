@@ -208,8 +208,8 @@ cat <<EOF > /etc/ldap/ldap.conf
 #
 BASE    $BASE_DN
 URI     ldap://$SERVERNAME:389 ldaps://$SERVERNAME:636
-SIZELIMIT       200
-TIMELIMIT       30
+SIZELIMIT       $SIZELIMIT
+TIMELIMIT       $TIMELIMIT
 EOF
 
 # setup base packages

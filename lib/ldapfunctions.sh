@@ -157,10 +157,10 @@ replace: olcReadOnly
 olcReadOnly: FALSE
 -
 replace: olcSizeLimit
-olcSizeLimit: 2000
+olcSizeLimit: $SIZELIMIT
 -
 replace: olcTimeLimit
-olcTimeLimit: 60
+olcTimeLimit: $TIMELIMIT
 -
 replace: olcDbIDLcacheSize
 olcDbIDLcacheSize: 500000
