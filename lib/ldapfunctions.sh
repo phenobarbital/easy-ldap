@@ -46,7 +46,8 @@ ldap_configure()
 	
 	# backend optimize
 	info "Optimizing backend"
-	$($BACKEND_tunning)
+	tunning="$BACKEND_tunning"
+	$(tunning)
 	
 	# ejecutar los hooks del directorio ldap.d
 	return 0	
