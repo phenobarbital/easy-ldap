@@ -1,0 +1,117 @@
+dn: $BASE_DN
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: $DOMAIN
+dc: $DC
+
+dn: cn=admin,$BASE_DN
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword:: e1NTSEF9MkRqZnpjN0NTQjhrZE9JTThNM05kMTAvbzd2UE93Qjc=
+
+dn: ou=hosts,$BASE_DN
+objectClass: top
+objectClass: organizationalUnit
+ou: hosts
+description: $DOMAIN hosts
+
+dn: ou=groups,$BASE_DN
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+description: Group definition for $DOMAIN
+
+dn: ou=people,$BASE_DN
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+description: $DOMAIN users
+
+dn: cn=organization,$BASE_DN
+objectClass: top
+objectClass: namedObject
+cn: organization
+
+dn: cn=services,$BASE_DN
+objectClass: top
+objectClass: namedObject
+cn: services
+
+dn: cn=policies,cn=services,$BASE_DN
+objectClass: top
+objectClass: namedObject
+cn: policies
+
+dn: cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: namedObject
+cn: ldap
+
+dn: cn=ldap-monitor,cn=ldap,cn=services,$BASE_DN
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+objectClass: top
+cn: ldap-monitor
+userPassword: MTIzNDU2
+description: LDAP User Monitor
+
+dn: cn=administrator,cn=ldap,cn=services,$BASE_DN
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: top
+cn: administrador
+gidNumber: 999
+uidNumber: 999
+homeDirectory: /etc/skel
+sn: administrator
+uid: administrator
+givenName: Administrator
+gecos: Administrator $DOMAIN
+loginShell: /bin/bash
+preferredLanguage: es
+
+dn: cn=groups,cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: namedObject
+cn: groups
+
+dn: cn=administrators,cn=groups,cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: posixGroup
+objectClass: namedObject
+cn: administrators
+gidNumber: 999
+memberUid: administrator
+description: Posix Administrators of $DOMAIN
+
+dn: cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: groupOfNames
+cn: ldap-admins
+member: cn=admin,$BASE_DN
+member: cn=administrator,cn=ldap,cn=services,$BASE_DN
+description: Grupo de administradores del LDAP
+
+dn: cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: groupOfNames
+cn: ldap-monitors
+member: cn=admin,$BASE_DN
+description: Read-Access for Monitor LDAP
+
+dn: cn=account-admins,cn=groups,cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: groupOfNames
+cn: account admins
+member: cn=admin,$BASE_DN
+description: Grupo de administradores del LDAP
+
+dn: cn=replicators,cn=groups,cn=ldap,cn=services,$BASE_DN
+objectClass: top
+objectClass: groupOfNames
+cn: replicators
+member: cn=ldap-monitor,cn=ldap,cn=services,$BASE_DN
+description: Grupo con permiso de lectura especial sobre el LDAP

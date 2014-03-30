@@ -44,6 +44,9 @@ ldap_configure()
 	info "Configure Logging"
 	log_configure
 	
+	info "Configure monitor database cn=monitor"
+	configure_monitor
+	
 	# create directory tree
 	info "Creating Directory Tree $BASE_DN"
 	
@@ -343,21 +346,57 @@ olcDbEnvFlags: {1}nometasync
 EOF
 }
 
+# configure database monitor
+function configure_monitor(){
+debug "creating cn=monitor database"
+
+$LDAPADD << EOF
+dn: olcDatabase=monitor,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: monitor
+olcAccess: {0}to * by dn.exact="cn=admin,$BASE_DN" write by * none
+olcAccess: {1}to dn.subtree="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN" read by users read by * none
+olcAccess: {2}to dn.children="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN" read
+olcLastMod: TRUE
+olcMaxDerefDepth: 15
+olcReadOnly: FALSE
+olcRootDN: cn=config
+olcMonitoring: TRUE
+EOF
+# y agregamos reglas de control de acceso en frontend
+$LDAPADD << EOF
+dn: olcDatabase={-1}frontend,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
+olcAccess: {1}to dn.exact="" by * read
+olcAccess: {2}to dn.base="cn=Subschema" by * read
+olcAccess: {3}to dn.subtree="cn=monitor" by dn="cn=admin,$BASE_DN" read
+olcAccess: {4}to dn.subtree="" by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN" read
+EOF
+}
+
+### create and configure directory trees
+
 # remove directory tree and database
 remove_tree()
 {
 	# search for directory on tree index
 	
 	# remove database directory
-	
+	# ldapsearch -H ldapi:/// -Y EXTERNAL -Q -b 'cn=config' '(olcSuffix=dc=inces,dc=gob,dc=ve)'
 	# remove config file
 }
 
 create_tree()
 {
-	# add olcDatabase
-	
 	# create directory for database
+	if [ ! -d "$DB_DIRECTORY" ]; then
+		mkdir -p $DB_DIRECTORY
+	fi
+	chmod 755 $DB_DIRECTORY
+	chown $LDAP_USER:$LDAP_GROUP $DB_DIRECTORY -R
+	# add olcDatabase
 	
 	# populate tree with Basic Tree LDIF
 	

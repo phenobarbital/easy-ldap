@@ -1,0 +1,20 @@
+dn: olcDatabase=$BACKEND,cn=config
+changetype: add
+objectClass: olcDatabaseConfig
+objectClass: $BACKENDOBJ
+olcDatabase: $BACKEND
+olcDbDirectory: $DB_DIRECTORY
+olcSuffix: $BASE_DN
+olcRootDN: $CN_ADMIN
+olcRootPW:: e1NTSEF9ZXB0a2dNTUxGSU1GUldwQ3VSdENZM2JkTmFtTVIreVc=
+olcDbIndex: objectClass eq
+olcAccess: {0}to attrs=userPassword,shadowLastChange by self write by anonymou
+ s auth by dn="$CN_ADMIN" write by * none
+olcAccess: {1}to dn.base="" by * read
+olcAccess: {2}to * by self write by dn="$CN_ADMIN" write by *
+  read
+olcLastMod: TRUE
+olcReadOnly: FALSE
+olcSizeLimit: $SIZELIMIT
+olcTimeLimit: $TIMELIMIT
+
