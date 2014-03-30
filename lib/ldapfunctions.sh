@@ -41,6 +41,9 @@ ldap_configure()
 	info "Enable basic modules"
 	ldap_modules
 	
+	info "Configure Logging"
+	log_configure
+	
 	# create directory tree
 	info "Creating Directory Tree $BASE_DN"
 	
@@ -101,6 +104,70 @@ olcAccess: {2}to dn.subtree="" by * read
 olcAccess: {3}to dn="cn=Subschema" by * read
 EOF
 
+}
+
+function log_configure() {
+
+debug "Configure slapd logging"
+
+# make new logging folder
+if [ ! -d "/var/log/slapd" ]; then
+	mkdir /var/log/slapd
+fi
+chmod 755 /var/log/slapd/
+chown $LDAP_USER:$LDAP_GROUP /var/log/slapd/ -R
+
+# change rsyslog
+# Redirect all log files through rsyslog.
+sed -i "/local4.*/d" /etc/rsyslog.conf
+
+# si no se encuentra la linea, se agrega a rsyslog
+if [ `cat /etc/rsyslog.conf | grep slapd.log | wc -l` == "0" ]; then
+cat >> /etc/rsyslog.conf << EOF
+local4.*                        /var/log/slapd/slapd.log
+EOF
+fi
+
+# LDAP logging
+$LDAPADD << EOF
+dn: cn=config
+changetype:modify
+replace: olcLogFile
+olcLogFile: /var/log/slapd/slapd.log
+EOF
+
+# Logging level
+$LDAPADD << EOF
+dn: cn=config
+changetype:modify
+replace: olcLogLevel
+olcLogLevel: config stats shell acl
+-
+replace: olcIdleTimeout
+olcIdleTimeout: 30
+-
+replace: olcGentleHUP
+olcGentleHUP: FALSE
+-
+replace: olcConnMaxPending
+olcConnMaxPending: 100
+EOF
+
+# configuring logrotate
+cat <<EOF > /etc/logrotate.d/slapd
+/var/log/slapd/slapd.log {
+        daily
+        missingok
+        rotate 7
+        compress
+        copytruncate
+        notifempty
+        create 640 openldap openldap
+}
+EOF
+
+# reiniciando rsyslog
+$SERVICE rsyslog restart
 }
 
 # habilitando todos los modulos necesarios:
@@ -276,3 +343,22 @@ olcDbEnvFlags: {1}nometasync
 EOF
 }
 
+# remove directory tree and database
+remove_tree()
+{
+	# search for directory on tree index
+	
+	# remove database directory
+	
+	# remove config file
+}
+
+create_tree()
+{
+	# add olcDatabase
+	
+	# create directory for database
+	
+	# populate tree with Basic Tree LDIF
+	
+}
