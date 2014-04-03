@@ -230,14 +230,21 @@ fi
 #done
 
 # setup utilities
-for package in "${PACKAGES[@]}"
-do
-install_package "$package"
-	if [ $? -ne 0 ]; then
-		error "Can't install package $package, please check your apt repository"
-		exit 1
-	fi
-done	
+packages=$(echo $PACKAGES | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
+install_package $packages
+if [ $? -ne 0 ]; then
+	error "Can't install utilities, please check your apt repository"
+	exit 1
+fi
+
+# for package in "${PACKAGES[@]}"
+#do
+#install_package "$package"
+#	if [ $? -ne 0 ]; then
+#		error "Can't install package $package, please check your apt repository"
+#		exit 1
+#	fi
+#done	
 	
 for package in "${SASL_PKGS[@]}"
 do

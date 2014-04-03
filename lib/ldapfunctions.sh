@@ -545,25 +545,9 @@ create_tree()
 }
 
 ssl_configure() {
-# creamos el directorio SSL:
-mkdir /etc/ldap/ssl -p
-
-# copiamos los certificados Debian basicos:
-# TODO: generar nuestros propios certificados
-if [ -f "/etc/ssl/certs/ssl-cert-snakeoil.pem" ]; then
-cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ldap/ssl
-fi
-
-if [ -f "/etc/ssl/private/ssl-cert-snakeoil.key" ]; then
-cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/ldap/ssl
-fi
-
-if [ -f "/etc/ssl/certs/ca.pem" ]; then
-cp /etc/ssl/certs/ca.pem /etc/ldap/ssl
-fi
-
-chmod 640 /etc/ldap/ssl
-chown $LDAP_USER:$LDAP_GROUP /etc/ldap/ssl -R
+# fix permissions
+chown root.ssl-cert /etc/ssl -R
+usermod -a -G ssl-cert openldap
 
 $LDAPADD << EOF
 dn: cn=config
@@ -571,17 +555,23 @@ changetype:modify
 replace: olcLocalSSF
 olcLocalSSF: 71
 -
+replace: olcTLSCACertificatePath
+olcTLSCACertificatePath: /etc/ssl/certs
+-
 replace: olcTLSCACertificateFile
-olcTLSCACertificateFile: /etc/ldap/ssl/ca.pem
+olcTLSCACertificateFile: /etc/ssl/certs/cacert.org.pem
 -
 replace: olcTLSCertificateFile
-olcTLSCertificateFile: /etc/ldap/ssl/ssl-cert-snakeoil.pem
+olcTLSCertificateFile: /etc/ssl/certs/ssl-cert-snakeoil.pem
 -
 replace: olcTLSCertificateKeyFile
-olcTLSCertificateKeyFile: /etc/ldap/ssl/ssl-cert-snakeoil.key
+olcTLSCertificateKeyFile: /etc/ssl/private/ssl-cert-snakeoil.key
+-
+replace: olcTLSCRLCheck
+olcTLSCRLCheck: none
 -
 replace: olcTLSVerifyClient
-olcTLSVerifyClient: never
+olcTLSVerifyClient: allow 
 -
 replace: olcTLSCipherSuite
 olcTLSCipherSuite: +RSA:+AES-256-CBC:+SHA1
