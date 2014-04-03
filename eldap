@@ -213,7 +213,9 @@ TIMELIMIT       $TIMELIMIT
 EOF
 
 # setup base packages
-packages=$(echo $BASE_PKGS | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
+# packages=$(echo $BASE_PKGS | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
+packages=$(IFS=$' '; echo "${BASE_PKGS[*]}")
+debug "installing $packages"
 install_package $packages
 if [ $? -ne 0 ]; then
 	error "Can't install base packages, please check your apt repository"
@@ -230,8 +232,10 @@ fi
 #done
 
 # setup utilities
-packages=$(echo $PACKAGES | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
-echo $packages
+# packages=$(echo $PACKAGES | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
+# echo $packages
+packages=$(IFS=$' '; echo "${PACKAGES[*]}")
+debug "installing $packages"
 install_package $packages
 if [ $? -ne 0 ]; then
 	error "Can't install utilities, please check your apt repository"
@@ -257,7 +261,7 @@ install_package "$package"
 done
 
 # install ldap-server
-install_package $LDAP_SERVER
+install_package $LDAP_SERVER ldap-utils
 
 sleep 1
 
