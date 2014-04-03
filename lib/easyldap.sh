@@ -14,7 +14,7 @@ INSTALLER="$(which aptitude) -y"
 SERVICE="$(which service)"
 
 # packages
-BASE_PKGS=( openssl libslp1 ssl-cert ca-certificates )
+BASE_PKGS=( openssl libslp1 ssl-cert ca-certificates gnutls-bin )
 PACKAGES=( ldap-utils lsof )
 SASL_PKGS=( sasl2-bin libsasl2-modules-ldap libsasl2-2 )
 		
