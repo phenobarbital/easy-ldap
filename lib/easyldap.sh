@@ -144,9 +144,9 @@ configdir()
 datadir()
 {
 		if [ -d "/usr/share/easyldap/data" ]; then
-			HOOKSDIR="/usr/share/easyldap/data"
+			DATADIR="/usr/share/easyldap/data"
 		else
-			HOOKSDIR="./data"
+			DATADIR="./data"
 		fi
 }
 
