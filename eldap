@@ -231,6 +231,7 @@ fi
 
 # setup utilities
 packages=$(echo $PACKAGES | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
+echo $packages
 install_package $packages
 if [ $? -ne 0 ]; then
 	error "Can't install utilities, please check your apt repository"
