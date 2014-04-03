@@ -562,6 +562,9 @@ if [ -f "/etc/ssl/certs/ca.pem" ]; then
 cp /etc/ssl/certs/ca.pem /etc/ldap/ssl
 fi
 
+chmod 640 /etc/ldap/ssl
+chown $LDAP_USER:$LDAP_GROUP /etc/ldap/ssl -R
+
 $LDAPADD << EOF
 dn: cn=config
 changetype:modify
