@@ -213,7 +213,6 @@ TIMELIMIT       $TIMELIMIT
 EOF
 
 # setup base packages
-# packages=$(echo $BASE_PKGS | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
 packages=$(IFS=$' '; echo "${BASE_PKGS[*]}")
 debug "installing $packages"
 install_package $packages
@@ -232,7 +231,6 @@ fi
 #done
 
 # setup utilities
-# packages=$(echo $PACKAGES | awk -F "(" '{print $2}' | awk -F ")" '{print $1}')
 # echo $packages
 packages=$(IFS=$' '; echo "${PACKAGES[*]}")
 debug "installing $packages"
@@ -240,16 +238,7 @@ install_package $packages
 if [ $? -ne 0 ]; then
 	error "Can't install utilities, please check your apt repository"
 	exit 1
-fi
-
-# for package in "${PACKAGES[@]}"
-#do
-#install_package "$package"
-#	if [ $? -ne 0 ]; then
-#		error "Can't install package $package, please check your apt repository"
-#		exit 1
-#	fi
-#done	
+fi	
 	
 for package in "${SASL_PKGS[@]}"
 do

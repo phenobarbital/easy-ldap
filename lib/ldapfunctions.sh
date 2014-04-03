@@ -38,8 +38,9 @@ ldap_configure()
 	info "Configure cn=config"
 	cn_config
 	
-	info "Configure SSL "
+	info "Configure SSL and SASL"
 	ssl_configure
+	sasl_configure
 	
 	info "Enable basic modules"
 	ldap_modules
@@ -59,6 +60,8 @@ ldap_configure()
 	
 	# password policies
 	# password_policies
+	
+	# ACL control
 	
 	# backend optimize
 	info "Optimizing $BACKEND backend"
@@ -576,4 +579,75 @@ olcTLSVerifyClient: allow
 replace: olcTLSCipherSuite
 olcTLSCipherSuite: +RSA:+AES-256-CBC:+SHA1
 EOF
+}
+
+sasl_configure() 
+{
+	info "Configuring SASL with openLDAP"
+# configuramos e iniciamos saslauthd
+$SED -i 's/START=no/START=yes/g' /etc/default/saslauthd
+$SED -i "s/MECHANISMS=.*$/MECHANISMS=\"ldap pam\"/g" /etc/default/saslauthd
+
+# configuramos saslauthd
+cat <<EOF > /etc/saslauthd.conf
+ldap_servers: ldap://$SERVERNAME/
+ldap_auth_method: bind
+ldap_bind_dn: cn=admin,$BASE_DN
+ldap_bind_pw: $PASS
+ldap_version: 3
+ldap_search_base: $BASE_DN
+ldap_filter: (uid=%U)
+ldap_verbose: on
+ldap_scope: sub
+ #SASL info
+ldap_default_realm: $DOMAIN
+ldap_use_sasl: no
+ldap_debug: 3
+EOF
+
+chmod 640 /etc/saslauthd.conf
+
+# reiniciamos el servicio
+/etc/init.d/saslauthd restart
+
+# configuramos SASL en openLDAP:
+$LDAPADD << EOF
+dn: cn=config
+changetype:modify
+replace: olcPasswordHash
+olcPasswordHash: {SSHA}
+-
+replace: olcSaslSecProps
+olcSaslSecProps: noplain,noanonymous,minssf=56
+-
+replace: olcAuthzPolicy
+olcAuthzPolicy: none
+-
+replace: olcConnMaxPendingAuth
+olcConnMaxPendingAuth: 1000
+-
+replace: olcSaslHost
+olcSaslHost: $SERVERNAME
+-
+replace: olcSaslRealm
+olcSaslRealm: $DOMAIN
+EOF
+
+# configuramos SASL en la DB
+$LDAPADD << EOF
+dn: cn=config
+changetype: modify
+replace: olcAuthzRegexp
+olcAuthzRegexp: uid=(.*),cn=.*,cn=.*,cn=auth ldap:///??sub?(uid=$1)
+EOF
+
+# verificamos el acceso a los mecanismos SASL
+echo
+echo " Verificando acceso a todos los mecanismos SASL "
+echo
+$LDAPSEARCH -x -b '' -s base -LLL supportedSASLMechanisms
+if [ "$?" -ne "0" ]; then
+   echo "Error: acceso a los mecanismos SASL, alto"
+   exit 1
+fi
 }
