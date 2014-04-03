@@ -38,6 +38,9 @@ ldap_configure()
 	info "Configure cn=config"
 	cn_config
 	
+	info "Configure SSL "
+	ssl_configure
+	
 	info "Enable basic modules"
 	ldap_modules
 	
@@ -539,4 +542,45 @@ create_tree()
 	
 	# change owner
 	chown $LDAP_USER:$LDAP_GROUP $DB_DIRECTORY -R
+}
+
+ssl_configure() {
+# creamos el directorio SSL:
+mkdir /etc/ldap/ssl -p
+
+# copiamos los certificados Debian basicos:
+# TODO: generar nuestros propios certificados
+if [ -f "/etc/ssl/certs/ssl-cert-snakeoil.pem" ]; then
+cp /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ldap/ssl
+fi
+
+if [ -f "/etc/ssl/private/ssl-cert-snakeoil.key" ]; then
+cp /etc/ssl/private/ssl-cert-snakeoil.key /etc/ldap/ssl
+fi
+
+if [ -f "/etc/ssl/certs/ca.pem" ]; then
+cp /etc/ssl/certs/ca.pem /etc/ldap/ssl
+fi
+
+$LDAPADD << EOF
+dn: cn=config
+changetype:modify
+replace: olcLocalSSF
+olcLocalSSF: 71
+-
+replace: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/ldap/ssl/ca.pem
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/ldap/ssl/ssl-cert-snakeoil.pem
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/ldap/ssl/ssl-cert-snakeoil.key
+-
+replace: olcTLSVerifyClient
+olcTLSVerifyClient: never
+-
+replace: olcTLSCipherSuite
+olcTLSCipherSuite: +RSA:+AES-256-CBC:+SHA1
+EOF
 }
