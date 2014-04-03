@@ -406,8 +406,6 @@ objectClass: top
 olcOverlay: refint
 olcRefintAttribute: member
 olcRefintAttribute: uniqueMember
-olcRefintAttribute: krbObjectReferences
-olcRefintAttribute: krbPwdPolicyReference
 olcRefintNothing: cn=admin,$BASE_DN
 EOF
 debug "Enable Unique Overlay"
@@ -446,18 +444,6 @@ olcMemberOfRefInt: TRUE
 olcMemberOfGroupOC: groupOfNames
 olcMemberOfMemberAD: member
 olcMemberOfMemberOfAD: memberOf
-EOF
-debug " = Dynamic Listing = "
-$LDAPADD << EOF
-dn: olcOverlay=dynlist,olcDatabase={$IDX}$BACKEND,cn=config 
-changetype: add
-objectClass: olcOverlayConfig
-objectClass: olcDynamicList
-olcOverlay: dynlist
-olcDLattrSet: {0}groupOfURLs memberURL member
-olcDLattrSet: {1}labeledURIObject labeledURI memberUid:uid
-olcDLattrSet: {2}groupOfNames labeledURI member
-olcDLattrSet: {3}groupOfURLs memberURL memberUid:uid
 EOF
 debug " SyncProv replication overlay "
 # configuracion de overlay de sincronia para DB
@@ -527,14 +513,14 @@ EOF
 ### create and configure directory trees
 
 # remove directory tree and database
-remove_tree()
-{
+#remove_tree()
+#{
 	# search for directory on tree index
 	
 	# remove database directory
 	# ldapsearch -H ldapi:/// -Y EXTERNAL -Q -b 'cn=config' '(olcSuffix=dc=inces,dc=gob,dc=ve)'
 	# remove config file
-}
+#}
 
 create_tree()
 {
