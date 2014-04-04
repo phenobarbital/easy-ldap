@@ -96,3 +96,10 @@ objectClass: groupOfNames
 cn: replicators
 member: cn=ldap-monitor,cn=ldap,ou=services,${BASE_DN}
 description: Grupo con permiso de lectura especial sobre el LDAP
+
+dn: cn=readers,cn=groups,cn=ldap,ou=services,${BASE_DN}
+objectClass: top
+objectClass: groupOfNames
+cn: readers
+member: cn=ldap-monitor,cn=ldap,ou=services,${BASE_DN}
+description: Grupo con permiso de lectura sobre el LDAP

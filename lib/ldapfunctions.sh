@@ -58,6 +58,7 @@ ldap_configure()
 	schema_configure
 	
 	# ACL control
+	acl_configure
 	
 	# backend optimize
 	info "Optimizing $BACKEND backend"
@@ -91,6 +92,11 @@ ldap_configure()
 	for f in $(find $HOOKSDIR/* -maxdepth 1 -executable -type f ! -iname "*.md" ! -iname ".*" | sort --numeric-sort); do
 		. $f
 	done
+	
+	# re-indexing tree
+	
+	# testing ACL
+	acl_testing
 	
 	return 0	
 }
@@ -140,6 +146,46 @@ olcAccess: {2}to dn.subtree="" by * read
 olcAccess: {3}to dn="cn=Subschema" by * read
 EOF
 
+}
+
+# configuracion de reglas de control de acceso
+acl_configure() {
+	IDX=$@
+	debug "Configuring ACL rules for openLDAP"
+# Configuring Access Control List"
+$LDAPADD << EOF
+dn: olcDatabase={$IDX}$BACKEND,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to attrs=userPassword,sambaNTPassword,sambaLMPassword,sambaPwdLastSet,sambaPwdMustChange,sambaPasswordHistory,shadowLastChange,shadowMin,shadowMax,shadowWarning,shadowInactive,shadowExpire,shadowFlag,pwdChangedTime,pwdAccountLockedTime,pwdFailureTime,pwdHistory,pwdGraceUseTime,pwdReset by self write by anonymous auth by dn="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by set="[cn=administradores,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by * none
+olcAccess: {1}to dn.base="" by * read
+olcAccess: {2}to attrs=carLicense,homePhone,mobile,pager,telephoneNumber by self write by set="this/manager & user" write by set="this/manager/secretary & user" write by dn="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write
+olcAccess: {3}to attrs=gidNumber,uidNumber,homeDirectory,uid,loginShell,gecos by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" manage by group.exact="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" read by dn="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" write
+olcAccess: {5}to dn.subtree="cn=policies,ou=services,$BASE_DN" by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" by * read
+olcAccess: {6}to dn.subtree="ou=people,$BASE_DN" by self write by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" by anonymous auth by * read
+olcAccess: {7}to dn.subtree="$BASE_DN" by self write by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" write by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by * read
+olcAccess: {8}to * by self write by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" write by dn="cn=administrator,cn=ldap,ou=services,$BASE_DN" write  by  by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
+EOF
+echo
+echo " == Configuracion de Limites == "
+echo
+# configuracion de los limites:
+$LDAPADD << EOF
+dn: olcDatabase={$IDX}$BACKEND,cn=config
+changetype: modify
+add: olcLimits
+olcLimits: {0}dn.base="cn=admin,$BASE_DN" size.soft=unlimited  size.hard=unlimited  time.soft=unlimited  time.hard=unlimited
+olcLimits: {1}group/groupOfNames/member="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" size=unlimited time=unlimited
+olcLimits: {2}group/groupOfNames/member="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" size=unlimited time=unlimited
+olcLimits: {3}group/groupOfNames/member="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" size=unlimited time=unlimited
+EOF
+}
+
+acl_testing()
+{
+info " Testing ACLs "
+debug "  * - Testing cn=administrator permissions to ou=people - * "
+$SLAPACL -D "cn=administrator,cn=ldap,ou=services,$BASE_DN" -b "$BASE_DN" "ou/write:people"
 }
 
 log_configure() {
@@ -667,7 +713,7 @@ if [ "$?" -ne "0" ]; then
 fi
 }
 
-function schema_configure() {
+schema_configure() {
 info "Loading basic schemas (namedObject and Password Policies)"
 datadir
 # copiamos los nuevos esquemas
@@ -685,9 +731,7 @@ load_basic_dit()
 	dit="$DATADIR/database/basicdit.ldif"
 	
 	debug "loading basic Directory information Tree"
-	
-	var="$LDAPADDUSER -c -D $CN_ADMIN -w$PASS"
-	warning "$var"
+
 $LDAPADDUSER -c -D "$CN_ADMIN" -w "$PASS" << EOF
 $(template $dit)
 EOF
