@@ -63,7 +63,7 @@ ldap_configure()
 	
 	info "Configuring Default Password Policy"
 	# password policies
-	password_policies
+	password_policies 1
 	
 	# ACL control
 	

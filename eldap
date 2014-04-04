@@ -28,6 +28,7 @@ configdir
 
 DEBUG='false'
 VERBOSE='false'
+PASS=''
 
 if [ "$(id -u)" != "0" ]; then
    error "==== MUST BE RUN AS ROOT ====" >&2
