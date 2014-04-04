@@ -58,7 +58,7 @@ ldap_configure()
 	schema_configure
 	
 	# ACL control
-	acl_configure
+	acl_configure 1
 	
 	# backend optimize
 	info "Optimizing $BACKEND backend"
