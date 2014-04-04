@@ -57,6 +57,15 @@ ldap_configure()
 	# loading schemas
 	schema_configure
 	
+	$SLAPTEST -F $LDAP_DIRECTORY
+	if [ "$?" -ne "0" ]; then
+		error "Failed to check openLDAP configuration"
+		exit 1
+	fi
+	
+	# first restart
+	service $LDAP_SERVER restart
+	
 	# loading directory tree
 	info "Creating Directory Tree $BASE_DN"
 	load_basic_dit
@@ -82,7 +91,7 @@ ldap_configure()
 	done
 	
 	# configure indexes
-	tree_indexing
+	tree_indexing 1
 	
 	return 0	
 }
@@ -678,16 +687,17 @@ load_basic_dit()
 	
 	debug "loading basic Directory information Tree"
 	
-$LDAPADDUSER -x -b "$BASE_DN" -D "cn=admin,$BASE_DN" -w "$PASS" << EOF
+$LDAPADDUSER -c -D "$CN_ADMIN" -w "$PASS" << EOF
 $(template $dit)
 EOF
 }
 
 tree_indexing()
 {
+	IDX=$@
 # e indexamos
 $LDAPADD << EOF
-dn: olcDatabase={1}hdb,cn=config
+dn: olcDatabase={$IDX}$BACKEND,cn=config
 changetype: modify
 replace: olcDbIndex
 olcDbIndex: objectClass eq
