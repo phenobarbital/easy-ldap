@@ -57,12 +57,24 @@ ldap_configure()
 	# loading schemas
 	schema_configure
 	
+	# ACL control
+	
+	# backend optimize
+	info "Optimizing $BACKEND backend"
+	case "$BACKEND" in
+		"mdb") mdb_tunning 1;;
+		"hdb") hdb_tunning 1;;
+		*)  break;;
+	esac
+	
+	# configure indexes
+	tree_indexing 1	
+	
 	$SLAPTEST -F $LDAP_DIRECTORY
 	if [ "$?" -ne "0" ]; then
 		error "Failed to check openLDAP configuration"
 		exit 1
 	fi
-	
 	# first restart
 	service $LDAP_SERVER restart
 	
@@ -74,24 +86,11 @@ ldap_configure()
 	# password policies
 	password_policies 1
 	
-	# ACL control
-	
-	# backend optimize
-	info "Optimizing $BACKEND backend"
-	case "$BACKEND" in
-		"mdb") mdb_tunning 1;;
-		"hdb") hdb_tunning 1;;
-		*)  break;;
-	esac
-	
 	# execute all hooks in ldap.d directory
 	actiondir
 	for f in $(find $HOOKSDIR/* -maxdepth 1 -executable -type f ! -iname "*.md" ! -iname ".*" | sort --numeric-sort); do
 		. $f
 	done
-	
-	# configure indexes
-	tree_indexing 1
 	
 	return 0	
 }
@@ -687,6 +686,8 @@ load_basic_dit()
 	
 	debug "loading basic Directory information Tree"
 	
+	var="$LDAPADDUSER -c -D $CN_ADMIN -w$PASS"
+	warning "$var"
 $LDAPADDUSER -c -D "$CN_ADMIN" -w "$PASS" << EOF
 $(template $dit)
 EOF
