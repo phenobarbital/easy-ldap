@@ -59,10 +59,11 @@ ldap_configure()
 	
 	# loading directory tree
 	info "Creating Directory Tree $BASE_DN"
-	load_dit
+	load_basic_dit
 	
+	info "Configuring Default Password Policy"
 	# password policies
-	# password_policies
+	password_policies
 	
 	# ACL control
 	
@@ -492,13 +493,13 @@ changetype: add
 objectClass: olcOverlayConfig
 objectClass: olcPPolicyConfig
 olcOverlay: ppolicy
-olcPPolicyDefault: cn=default,ou=policies,ou=services,$BASE_DN
+olcPPolicyDefault: cn=default,cn=policies,ou=services,$BASE_DN
 olcPPolicyHashCleartext: TRUE
 olcPPolicyUseLockout: FALSE
 EOF
 # cargamos las reglas del password policy
 $LDAPADDUSER -D "cn=admin,$BASE_DN" -w $PASS << EOF
-dn: cn=default,ou=policies,ou=services,$BASE_DN
+dn: cn=default,cn=policies,ou=services,$BASE_DN
 cn: default
 objectClass: pwdPolicy
 objectClass: person
@@ -662,7 +663,7 @@ function schema_configure() {
 info "Loading basic schemas (namedObject and Password Policies)"
 datadir
 # copiamos los nuevos esquemas
-cp $DATADIR/data/schemas/* $LDAP_DIRECTORY/cn\=config/cn\=schema/
+cp $DATADIR/schemas/* $LDAP_DIRECTORY/cn\=config/cn\=schema/
 # asignar el propietario y grupo:
 chown $LDAP_USER:$LDAP_GROUP $LDAP_DIRECTORY -R
 }
