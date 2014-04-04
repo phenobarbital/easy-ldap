@@ -1,4 +1,3 @@
-* Que la instalacion de utilities sea uno solo y no uno a uno (eliminar el for)
 * Verificar la configuración para SASL
 * Incorporar DATA de ejemplo de diversos tipos
 * Configurar reglas y extensiones para Asterisk

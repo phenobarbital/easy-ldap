@@ -81,7 +81,8 @@ ldap_configure()
 	done
 	
 	# configure indexes
-		
+	tree_indexing
+	
 	return 0	
 }
 
@@ -676,7 +677,34 @@ load_basic_dit()
 	
 	info "loading basic Directory information Tree"
 	
-	$LDAPADDUSER -D "cn=admin,$BASE_DN" -w $PASS -c << EOF
-	$(template $dit)
-	EOF
+$LDAPADDUSER -D "cn=admin,$BASE_DN" -w $PASS << EOF
+$(template $dit)
+EOF
+}
+
+tree_indexing()
+{
+# e indexamos
+$LDAPADD << EOF
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+replace: olcDbIndex
+olcDbIndex: objectClass eq
+olcDbIndex: uid eq,approx,sub
+olcDbIndex: telephoneNumber eq,sub,pres
+olcDbIndex: uidNumber,gidNumber,memberUid,loginShell eq
+#indice para entradas cn,ou,o,sn,uid
+olcDbIndex: cn,sn,ou,o eq,pres,sub,subinitial
+#indice para busqueda de nombres,apellidos, etc
+olcDbIndex: givenname,displayName eq,subinitial,approx
+olcDbIndex: employeeType,employeeNumber,l pres,eq
+#indice para cuentas de correo
+olcDbIndex: mail pres,eq,sub
+# posixAccount
+olcDbIndex: homeDirectory,gecos eq
+#indice para NIS
+olcDbIndex: nisMapName,nisMapEntry eq,pres,sub
+# indice para replicacion
+olcDbIndex: entryCSN,entryUUID pres,eq
+EOF
 }
