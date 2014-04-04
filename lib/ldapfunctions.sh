@@ -676,9 +676,9 @@ load_basic_dit()
 	datadir
 	dit="$DATADIR/database/basicdit.ldif"
 	
-	info "loading basic Directory information Tree"
+	debug "loading basic Directory information Tree"
 	
-$LDAPADDUSER -D "cn=admin,$BASE_DN" -w $PASS << EOF
+$LDAPADDUSER -x -b "$BASE_DN" -D "cn=admin,$BASE_DN" -w "$PASS" << EOF
 $(template $dit)
 EOF
 }

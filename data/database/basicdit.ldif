@@ -63,7 +63,6 @@ cn: groups
 dn: cn=administrators,cn=groups,cn=ldap,ou=services,${BASE_DN}
 objectClass: top
 objectClass: posixGroup
-objectClass: namedObject
 cn: administrators
 gidNumber: 999
 memberUid: administrator
