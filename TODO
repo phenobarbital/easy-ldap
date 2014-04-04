@@ -1,4 +1,5 @@
 * Verificar la configuración para SASL
+* Corregir sintaxis de ACLs para grupos
 * Incorporar DATA de ejemplo de diversos tipos
 * Configurar reglas y extensiones para Asterisk
 * Configuración de replicación (consumer) contra otro servidor LDAP

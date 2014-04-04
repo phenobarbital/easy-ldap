@@ -157,14 +157,14 @@ $LDAPADD << EOF
 dn: olcDatabase={$IDX}$BACKEND,cn=config
 changetype: modify
 replace: olcAccess
-olcAccess: {0}to attrs=userPassword,sambaNTPassword,sambaLMPassword,sambaPwdLastSet,sambaPwdMustChange,sambaPasswordHistory,shadowLastChange,shadowMin,shadowMax,shadowWarning,shadowInactive,shadowExpire,shadowFlag,pwdChangedTime,pwdAccountLockedTime,pwdFailureTime,pwdHistory,pwdGraceUseTime,pwdReset by self write by anonymous auth by dn="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by * none
+olcAccess: {0}to attrs=userPassword,shadowLastChange,shadowMin,shadowMax,shadowWarning,shadowInactive,shadowExpire,shadowFlag,pwdChangedTime,pwdAccountLockedTime,pwdFailureTime,pwdHistory,pwdGraceUseTime,pwdReset by self write by anonymous auth by group="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" manage by group="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by * none
 olcAccess: {1}to dn.base="" by * read
 olcAccess: {2}to attrs=carLicense,homePhone,mobile,pager,telephoneNumber by self write by set="this/manager & user" write by set="this/manager/secretary & user" write by dn="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write
-olcAccess: {3}to attrs=gidNumber,uidNumber,homeDirectory,uid,loginShell,gecos by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" manage by group.exact="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" read by dn="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" write
-olcAccess: {4}to dn.subtree="cn=policies,ou=services,$BASE_DN" by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" by * read
-olcAccess: {5}to dn.subtree="ou=people,$BASE_DN" by self write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
-olcAccess: {6}to dn.subtree="ou=services,$BASE_DN" by self write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
-olcAccess: {7}to * by self write by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" write by dn="cn=administrator,cn=ldap,ou=services,$BASE_DN" write  by  by group/groupOfNames/member.exact="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group/groupOfNames/member.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
+olcAccess: {3}to attrs=gidNumber,uidNumber,homeDirectory,uid,loginShell,gecos by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" manage by group.exact="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" read by dn="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group.exact="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" write
+olcAccess: {4}to dn.subtree="cn=policies,ou=services,$BASE_DN" by group="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group="cn=readers,cn=groups,cn=ldap,ou=services,$BASE_DN" by * read
+olcAccess: {5}to dn.subtree="ou=people,$BASE_DN" by self write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
+olcAccess: {6}to dn.subtree="ou=services,$BASE_DN" by self write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
+olcAccess: {7}to * by self write by set="[cn=administrators,cn=groups,cn=ldap,ou=services,$BASE_DN]/memberUid & user/uid" write by dn="cn=administrator,cn=ldap,ou=services,$BASE_DN" write  by  by group="cn=account-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" manage by group="cn=replicators,cn=groups,cn=ldap,ou=services,$BASE_DN" read by anonymous auth by * read
 EOF
 echo
 echo " == Configuracion de Limites == "
@@ -223,7 +223,7 @@ $LDAPADD << EOF
 dn: cn=config
 changetype:modify
 replace: olcLogLevel
-olcLogLevel: config stats shell acl
+olcLogLevel: config stats shell
 -
 replace: olcIdleTimeout
 olcIdleTimeout: 30
@@ -435,8 +435,8 @@ dn: olcDatabase=monitor,cn=config
 objectClass: olcDatabaseConfig
 olcDatabase: monitor
 olcAccess: {0}to * by dn.exact="cn=admin,$BASE_DN" write by * none
-olcAccess: {1}to dn.subtree="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read by users read by * none
-olcAccess: {2}to dn.children="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read
+olcAccess: {1}to dn.subtree="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read by users read by * none
+olcAccess: {2}to dn.children="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read
 olcLastMod: TRUE
 olcMaxDerefDepth: 15
 olcReadOnly: FALSE
@@ -452,7 +452,7 @@ olcAccess: {0}to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,c
 olcAccess: {1}to dn.exact="" by * read
 olcAccess: {2}to dn.base="cn=Subschema" by * read
 olcAccess: {3}to dn.subtree="cn=monitor" by dn="cn=admin,$BASE_DN" read
-olcAccess: {4}to dn.subtree="" by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read
+olcAccess: {4}to dn.subtree="" by group="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read
 EOF
 }
 
