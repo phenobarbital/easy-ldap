@@ -585,8 +585,8 @@ sasl_configure()
 {
 	info "Configuring SASL with openLDAP"
 # configuramos e iniciamos saslauthd
-$SED -i 's/START=no/START=yes/g' /etc/default/saslauthd
-$SED -i "s/MECHANISMS=.*$/MECHANISMS=\"ldap pam\"/g" /etc/default/saslauthd
+sed -i 's/START=no/START=yes/g' /etc/default/saslauthd
+sed -i "s/MECHANISMS=.*$/MECHANISMS=\"ldap pam\"/g" /etc/default/saslauthd
 
 # configuramos saslauthd
 cat <<EOF > /etc/saslauthd.conf
