@@ -54,9 +54,12 @@ ldap_configure()
 	# configure overlays
 	overlay_configure 1
 	
+	# loading schemas
+	schema_configure
+	
 	# loading directory tree
 	info "Creating Directory Tree $BASE_DN"
-	# load_dit
+	load_dit
 	
 	# password policies
 	# password_policies
@@ -76,6 +79,8 @@ ldap_configure()
 	for f in $(find $HOOKSDIR/* -maxdepth 1 -executable -type f ! -iname "*.md" ! -iname ".*" | sort --numeric-sort); do
 		. $f
 	done
+	
+	# configure indexes
 		
 	return 0	
 }
@@ -374,8 +379,8 @@ dn: olcDatabase=monitor,cn=config
 objectClass: olcDatabaseConfig
 olcDatabase: monitor
 olcAccess: {0}to * by dn.exact="cn=admin,$BASE_DN" write by * none
-olcAccess: {1}to dn.subtree="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN" read by users read by * none
-olcAccess: {2}to dn.children="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN" read
+olcAccess: {1}to dn.subtree="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read by users read by * none
+olcAccess: {2}to dn.children="cn=monitor" by dn.exact="cn=admin,$BASE_DN" write by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read
 olcLastMod: TRUE
 olcMaxDerefDepth: 15
 olcReadOnly: FALSE
@@ -391,7 +396,7 @@ olcAccess: {0}to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,c
 olcAccess: {1}to dn.exact="" by * read
 olcAccess: {2}to dn.base="cn=Subschema" by * read
 olcAccess: {3}to dn.subtree="cn=monitor" by dn="cn=admin,$BASE_DN" read
-olcAccess: {4}to dn.subtree="" by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,cn=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,cn=services,$BASE_DN" read
+olcAccess: {4}to dn.subtree="" by group/groupOfNames/member.exact="cn=ldap-admins,cn=groups,cn=ldap,ou=services,$BASE_DN" read by group/groupOfNames/member.exact="cn=ldap-monitors,cn=groups,cn=ldap,ou=services,$BASE_DN" read
 EOF
 }
 
@@ -486,13 +491,13 @@ changetype: add
 objectClass: olcOverlayConfig
 objectClass: olcPPolicyConfig
 olcOverlay: ppolicy
-olcPPolicyDefault: cn=default,cn=policies,cn=services,$BASE_DN
+olcPPolicyDefault: cn=default,ou=policies,ou=services,$BASE_DN
 olcPPolicyHashCleartext: TRUE
 olcPPolicyUseLockout: FALSE
 EOF
 # cargamos las reglas del password policy
 $LDAPADDUSER -D "cn=admin,$BASE_DN" -w $PASS << EOF
-dn: cn=default,cn=policies,cn=services,$BASE_DN
+dn: cn=default,ou=policies,ou=services,$BASE_DN
 cn: default
 objectClass: pwdPolicy
 objectClass: person
@@ -650,4 +655,28 @@ if [ "$?" -ne "0" ]; then
    echo "Error: acceso a los mecanismos SASL, alto"
    exit 1
 fi
+}
+
+function schema_configure() {
+info "Loading basic schemas (namedObject and Password Policies)"
+datadir
+# copiamos los nuevos esquemas
+cp $DATADIR/data/schemas/* $LDAP_DIRECTORY/cn\=config/cn\=schema/
+# asignar el propietario y grupo:
+chown $LDAP_USER:$LDAP_GROUP $LDAP_DIRECTORY -R
+}
+
+### DIT functions
+
+load_basic_dit()
+{
+	# load a basic dit for a simple ldap tree
+	datadir
+	dit="$DATADIR/database/basicdit.ldif"
+	
+	info "loading basic Directory information Tree"
+	
+	$LDAPADDUSER -D "cn=admin,$BASE_DN" -w $PASS -c << EOF
+	$(template $dit)
+	EOF
 }

@@ -122,6 +122,45 @@ optarg_check()
     fi
 }
 
+## Templating
+
+# expand all shell backsticks, subshell and variable environment substitution
+shelltemplate()
+{
+	# loading a template
+	file=$@
+	if [ -f "$file" ]; then
+	eval "cat <<EOF
+$(<${file})
+EOF
+" 2> /dev/null
+	fi
+}
+
+# replace all bash placeholders (${}) with your value without replace shell and sub-shell strings
+# usage: var=$(template $filename)
+# or
+#var=$(cat << _MSG
+#$(template $filename)
+#_MSG
+#)
+template()
+{
+	file=$@
+	if [ -f "$file" ]; then
+	while read -r line ; do
+		line=${line//\"/\\\"}
+		line=${line//\`/\\\`}
+		line=${line//\$/\\\$}
+		line=${line//\\\${/\${}
+		eval "echo \"$line\"";
+	done < "${file}"
+		return 0
+	else
+		return 1
+	fi
+}
+
 ## info functions
 
 ldapfunctions() {
