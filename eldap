@@ -270,14 +270,15 @@ ldap_configure
 test_config
 
 echo
-echo "First restart ..."
+echo "Last restart ..."
 $SERVICE $LDAP_SERVER restart
 sleep 1
 echo
 echo "Remember: Admin Bind DN is:"
 echo "cn=admin,$BASE_DN"
+echo
 
-info " [ Easy-LDAP Installed ]"
+info " [ Easy-LDAP is Installed ]"
 
 }
 

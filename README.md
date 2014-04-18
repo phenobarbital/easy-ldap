@@ -1,7 +1,7 @@
 EASY LDAP (ELDAP) v2.0
 ======================
 
-ELDAP permite una fácil implementación de openldap en servidores GNU/Linux Debian y derivados.
+EASY LDAP permite una fácil implementación de openldap en servidores GNU/Linux Debian y derivados.
 
 Provee instalación y post-configuración automatizada para:
 
@@ -15,7 +15,7 @@ Además, permite la posterior instalación y configuración de:
 * Esquemas y módulos asociados
 * Nuevos árboles LDAP
 * Anillos de Claves (SSH-keys, GNUPG y x.509)
-* Replicación
+* Replicación (syncprov)
 
 Entre las características soportadas actualmente:
 
@@ -62,5 +62,3 @@ Las siguientes aplicaciones ya tienen configuración conectada a ELDAP:
 * FreeRadius
 
 Y otros módulos conectores adicionales.
-
-
